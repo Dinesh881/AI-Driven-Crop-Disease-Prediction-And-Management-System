@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Detection - Crop AI System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-3 mb-3">
+            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-microscope text-red-600 text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Plant Disease Detection</h1>
+                <p class="text-slate-600">Upload a plant leaf image for AI-powered disease identification</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <form method="POST" action="{{ url_for('disease_detection') }}" enctype="multipart/form-data" id="diseaseForm">
+            <!-- File Upload Area -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-3">
+                    <i class="fas fa-image text-red-600 mr-2"></i>
+                    Upload Plant Image
+                </label>
+                
+                <!-- Custom Upload Area -->
+                <div class="relative">
+                    <input type="file" 
+                           id="plant_image" 
+                           name="plant_image" 
+                           accept="image/png, image/jpeg, image/jpg"
+                           required
+                           class="hidden"
+                           onchange="previewImage(event)">
+                    
+                    <label for="plant_image" 
+                           class="flex flex-col items-center justify-center w-full h-64 px-4 py-6 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                        <div id="uploadPlaceholder" class="flex flex-col items-center justify-center text-center">
+                            <i class="fas fa-cloud-upload-alt text-5xl text-slate-400 mb-4"></i>
+                            <p class="mb-2 text-sm text-slate-600">
+                                <span class="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p class="text-xs text-slate-500">PNG, JPG or JPEG (MAX. 16MB)</p>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreview" class="hidden w-full h-full">
+                            <img id="previewImg" src="" alt="Preview" class="w-full h-full object-contain rounded-lg">
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Selected File Info -->
+                <div id="fileInfo" class="hidden mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-image text-red-600"></i>
+                            <span id="fileName" class="text-sm text-slate-700"></span>
+                        </div>
+                        <button type="button" 
+                                onclick="clearImage()" 
+                                class="text-sm text-red-600 hover:text-red-700 font-medium">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6 border-t border-slate-200">
+                <button type="submit" 
+                        class="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+                    <i class="fas fa-microscope mr-2"></i>
+                    Analyze Plant Image
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Boxes -->
+    <div class="mt-6 space-y-4">
+        <!-- Tips -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-lightbulb text-blue-600 mt-1"></i>
+                <div>
+                    <h4 class="text-sm font-semibold text-blue-900 mb-2">Tips for Best Results</h4>
+                    <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                        <li>Use clear, well-lit images of plant leaves</li>
+                        <li>Focus on the affected area showing disease symptoms</li>
+                        <li>Avoid blurry or dark images</li>
+                        <li>Capture single leaf against plain background if possible</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supported Diseases -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
+                <div>
+                    <h4 class="text-sm font-semibold text-emerald-900 mb-2">AI-Powered Detection</h4>
+                    <p class="text-sm text-emerald-800">
+                        Our deep learning model can identify various plant diseases including blight, rust, leaf spot, and more. 
+                        The system provides confidence scores and management recommendations for detected diseases.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+            document.getElementById('imagePreview').classList.remove('hidden');
+            document.getElementById('previewImg').src = e.target.result;
+            
+            document.getElementById('fileInfo').classList.remove('hidden');
+            document.getElementById('fileName').textContent = file.name;
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function clearImage() {
+    document.getElementById('plant_image').value = '';
+    document.getElementById('uploadPlaceholder').classList.remove('hidden');
+    document.getElementById('imagePreview').classList.add('hidden');
+    document.getElementById('fileInfo').classList.add('hidden');
+}
+</script>
+{% endblock %}

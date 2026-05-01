@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Recommendation - Crop AI System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-3 mb-3">
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-leaf text-emerald-600 text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Crop Recommendation</h1>
+                <p class="text-slate-600">Get AI-powered crop suggestions based on soil and weather conditions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <form method="POST" action="{{ url_for('crop_recommendation') }}" class="space-y-6">
+            <!-- Soil Parameters Section -->
+            <div>
+                <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                    <i class="fas fa-layer-group text-emerald-600 mr-2"></i>
+                    Soil Parameters (NPK Values)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Nitrogen -->
+                    <div>
+                        <label for="nitrogen" class="block text-sm font-medium text-slate-700 mb-2">
+                            Nitrogen (N)
+                        </label>
+                        <input type="number" 
+                               id="nitrogen" 
+                               name="nitrogen" 
+                               required
+                               step="0.1"
+                               min="0"
+                               max="200"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 75">
+                        <p class="mt-1 text-xs text-slate-500">Range: 0-200 mg/kg</p>
+                    </div>
+
+                    <!-- Phosphorus -->
+                    <div>
+                        <label for="phosphorus" class="block text-sm font-medium text-slate-700 mb-2">
+                            Phosphorus (P)
+                        </label>
+                        <input type="number" 
+                               id="phosphorus" 
+                               name="phosphorus" 
+                               required
+                               step="0.1"
+                               min="0"
+                               max="200"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 55">
+                        <p class="mt-1 text-xs text-slate-500">Range: 0-200 mg/kg</p>
+                    </div>
+
+                    <!-- Potassium -->
+                    <div>
+                        <label for="potassium" class="block text-sm font-medium text-slate-700 mb-2">
+                            Potassium (K)
+                        </label>
+                        <input type="number" 
+                               id="potassium" 
+                               name="potassium" 
+                               required
+                               step="0.1"
+                               min="0"
+                               max="200"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 40">
+                        <p class="mt-1 text-xs text-slate-500">Range: 0-200 mg/kg</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Season Selection Section -->
+            <div class="pt-6 border-t border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt text-emerald-600 mr-2"></i>
+                    Season Selection
+                </h3>
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Season -->
+                    <div>
+                        <label for="season" class="block text-sm font-medium text-slate-700 mb-2">
+                            Growing Season
+                        </label>
+                        <select id="season" 
+                                name="season" 
+                                class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+                            <option value="">All Season (No Preference)</option>
+                            <option value="Kharif">Kharif (Monsoon - June to October)</option>
+                            <option value="Rabi">Rabi (Winter - November to March)</option>
+                            <option value="Zaid">Zaid (Summer - March to June)</option>
+                        </select>
+                        <p class="mt-1 text-xs text-slate-500">Select the season for crop recommendations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Parameters Section -->
+            <div class="pt-6 border-t border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                    <i class="fas fa-cloud-sun text-emerald-600 mr-2"></i>
+                    Weather Conditions
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Temperature -->
+                    <div>
+                        <label for="temperature" class="block text-sm font-medium text-slate-700 mb-2">
+                            Temperature (°C)
+                        </label>
+                        <input type="number" 
+                               id="temperature" 
+                               name="temperature" 
+                               required
+                               step="0.1"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 25.5">
+                        <p class="mt-1 text-xs text-slate-500">Average temperature</p>
+                    </div>
+
+                    <!-- Humidity -->
+                    <div>
+                        <label for="humidity" class="block text-sm font-medium text-slate-700 mb-2">
+                            Humidity (%)
+                        </label>
+                        <input type="number" 
+                               id="humidity" 
+                               name="humidity" 
+                               required
+                               step="0.1"
+                               min="0"
+                               max="100"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 65">
+                        <p class="mt-1 text-xs text-slate-500">Relative humidity (0-100%)</p>
+                    </div>
+
+                    <!-- Rainfall -->
+                    <div>
+                        <label for="rainfall" class="block text-sm font-medium text-slate-700 mb-2">
+                            Rainfall (mm)
+                        </label>
+                        <input type="number" 
+                               id="rainfall" 
+                               name="rainfall" 
+                               required
+                               step="0.1"
+                               min="0"
+                               class="block w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                               placeholder="e.g., 150">
+                        <p class="mt-1 text-xs text-slate-500">Annual rainfall</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6 border-t border-slate-200">
+                <button type="submit" 
+                        class="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition">
+                    <i class="fas fa-seedling mr-2"></i>
+                    Get Crop Recommendations
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+            <div>
+                <h4 class="text-sm font-semibold text-blue-900 mb-1">How it works</h4>
+                <p class="text-sm text-blue-800">
+                    Our AI analyzes your soil's NPK levels along with weather conditions to recommend the most suitable crops for your field. 
+                    The system considers optimal growing conditions for each crop to provide accurate recommendations.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

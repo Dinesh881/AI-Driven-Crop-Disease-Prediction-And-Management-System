@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Crop AI System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    {% if session.user_id %}
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-seedling text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-semibold text-slate-800">CropAI</span>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{{ url_for('dashboard') }}" class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('crop_recommendation') }}" class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition">
+                        <i class="fas fa-leaf mr-2"></i>Crop Recommendation
+                    </a>
+                    <a href="{{ url_for('fertilizer_recommendation') }}" class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition">
+                        <i class="fas fa-flask mr-2"></i>Fertilizer
+                    </a>
+                    <a href="{{ url_for('disease_detection') }}" class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-slate-50 rounded-lg transition">
+                        <i class="fas fa-microscope mr-2"></i>Disease Detection
+                    </a>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-3">
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-slate-700">{{ session.user_name }}</p>
+                            <p class="text-xs text-slate-500 capitalize">{{ session.user_role }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                            <span class="text-emerald-700 font-semibold text-sm">{{ session.user_name[0].upper() }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="px-4 py-2 text-sm font-medium text-white bg-slate-700 hover:bg-slate-800 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                    <div class="px-4 py-3 rounded-lg mb-3 {% if category == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% elif category == 'danger' %}bg-red-50 border border-red-200 text-red-800{% elif category == 'warning' %}bg-amber-50 border border-amber-200 text-amber-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %}">
+                        <div class="flex items-center">
+                            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-3"></i>
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-slate-600 text-sm">
+                <p>&copy; 2026 CropAI - AI-Driven Crop Disease Prediction System</p>
+                <p class="mt-2 text-slate-500">Empowering farmers with intelligent agricultural solutions</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Contact Support Widget -->
+    {% if session.user_id and session.user_role == 'farmer' %}
+    <div class="fixed bottom-6 right-6 z-50">
+        <!-- Contact Panel (Hidden by default) -->
+        <div id="contactPanel" class="mb-4 bg-white rounded-2xl shadow-2xl border border-slate-200 w-80 transform transition-all duration-300 scale-0 origin-bottom-right opacity-0">
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-white font-semibold text-lg flex items-center">
+                        <i class="fas fa-headset mr-2"></i>
+                        Need Help?
+                    </h3>
+                    <button onclick="toggleContactPanel()" class="text-white hover:text-emerald-100 transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <p class="text-emerald-100 text-sm mt-1">Connect with our agricultural experts</p>
+            </div>
+            
+            <div class="p-4 max-h-80 overflow-y-auto">
+                <p class="text-sm text-slate-600 mb-4">
+                    <i class="fas fa-info-circle text-emerald-600 mr-2"></i>
+                    Contact our admin team for assistance
+                </p>
+                
+                <!-- Contact List -->
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 1</p>
+                            <a href="tel:+919391740501" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 93917 40501
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 2</p>
+                            <a href="tel:+919505090350" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 95050 90350
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 3</p>
+                            <a href="tel:+916305564684" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 63055 64684
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 4</p>
+                            <a href="tel:+917330799622" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 73307 99622
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 5</p>
+                            <a href="tel:+919347188939" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 93471 88939
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-emerald-700 font-medium">Admin 6</p>
+                            <a href="tel:+919347188939" class="text-sm font-semibold text-slate-800 hover:text-emerald-600 flex items-center">
+                                <i class="fas fa-phone-alt text-xs mr-2 text-emerald-600"></i>
+                                +91 93471 88939
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p class="text-xs text-blue-800 flex items-start">
+                        <i class="fas fa-lightbulb text-blue-600 mr-2 mt-0.5"></i>
+                        <span>Our experts are available to guide you with soil values, crop selection, and disease identification.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Contact Button -->
+        <button onclick="toggleContactPanel()" 
+                id="contactButton"
+                class="w-16 h-16 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-full shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 flex items-center justify-center group hover:scale-110">
+            <i id="contactIcon" class="fas fa-comments text-2xl group-hover:scale-110 transition-transform"></i>
+        </button>
+    </div>
+
+    <script>
+        function toggleContactPanel() {
+            const panel = document.getElementById('contactPanel');
+            const icon = document.getElementById('contactIcon');
+            
+            if (panel.classList.contains('scale-0')) {
+                // Show panel
+                panel.classList.remove('scale-0', 'opacity-0');
+                panel.classList.add('scale-100', 'opacity-100');
+                icon.classList.remove('fa-comments');
+                icon.classList.add('fa-times');
+            } else {
+                // Hide panel
+                panel.classList.remove('scale-100', 'opacity-100');
+                panel.classList.add('scale-0', 'opacity-0');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-comments');
+            }
+        }
+    </script>
+    {% endif %}
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if result_type == 'crop' %}Crop Recommendations
+{% elif result_type == 'fertilizer' %}Fertilizer Recommendations
+{% elif result_type == 'disease' %}Disease Detection Results
+{% endif %} - Crop AI System
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% if result_type == 'crop' %}{{ url_for('crop_recommendation') }}{% elif result_type == 'fertilizer' %}{{ url_for('fertilizer_recommendation') }}{% else %}{{ url_for('disease_detection') }}{% endif %}" 
+           class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-4">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+        </a>
+        
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 {% if result_type == 'crop' %}bg-emerald-100{% elif result_type == 'fertilizer' %}bg-amber-100{% else %}bg-red-100{% endif %} rounded-lg flex items-center justify-center">
+                <i class="fas {% if result_type == 'crop' %}fa-leaf text-emerald-600{% elif result_type == 'fertilizer' %}fa-flask text-amber-600{% else %}fa-microscope text-red-600{% endif %} text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">
+                    {% if result_type == 'crop' %}Crop Recommendations
+                    {% elif result_type == 'fertilizer' %}Fertilizer Recommendations
+                    {% elif result_type == 'disease' %}Disease Detection Results
+                    {% endif %}
+                </h1>
+                <p class="text-slate-600">Analysis complete - Review your results below</p>
+            </div>
+        </div>
+    </div>
+
+    {% if result_type == 'crop' %}
+    <!-- Crop Recommendation Results -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-6 flex items-center">
+            <i class="fas fa-seedling text-emerald-600 mr-2"></i>
+            Recommended Crops
+        </h2>
+        
+        <div class="space-y-4">
+            {% for crop, score in recommendations %}
+            <div class="border border-slate-200 rounded-lg p-6 hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-slate-800">{{ crop }}</h3>
+                    <span class="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-semibold">
+                        {{ "%.1f"|format(score) }}% Match
+                    </span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div class="bg-emerald-600 h-3 rounded-full transition-all duration-500 crop-progress" 
+                         data-width="{{ score }}"></div>
+                </div>
+                
+                <p class="mt-3 text-sm text-slate-600">
+                    This crop is highly suitable for your soil and climate conditions.
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Model Performance (if ML model used) -->
+    {% if model_used %}
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-6 flex items-center">
+            <i class="fas fa-chart-bar text-emerald-600 mr-2"></i>
+            ML Model Performance
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border border-slate-200 rounded-lg p-4">
+                <p class="text-sm text-slate-600 mb-1">Model Used</p>
+                <p class="text-xl font-bold text-slate-800">{{ model_used }}</p>
+            </div>
+            
+            {% if model_metrics %}
+            <div class="border border-slate-200 rounded-lg p-4">
+                <p class="text-sm text-slate-600 mb-1">Accuracy</p>
+                <p class="text-xl font-bold text-emerald-600">{{ "%.1f"|format(model_metrics.accuracy) }}%</p>
+            </div>
+            
+            <div class="border border-slate-200 rounded-lg p-4">
+                <p class="text-sm text-slate-600 mb-1">CV Score</p>
+                <p class="text-xl font-bold text-blue-600">{{ "%.1f"|format(model_metrics.cv_mean) }}%</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif result_type == 'fertilizer' %}
+    <!-- Fertilizer Recommendation Results -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
+        <h2 class="text-xl font-semibold text-slate-800 mb-2 flex items-center">
+            <i class="fas fa-flask text-amber-600 mr-2"></i>
+            Fertilizer Analysis for {{ crop }}
+        </h2>
+        <p class="text-slate-600 mb-6">Based on current soil NPK levels</p>
+        
+        <div class="space-y-4">
+            {% for rec in fertilizer_recommendations %}
+            <div class="border border-slate-200 rounded-lg p-6 {% if rec.status == 'Low' %}bg-red-50 border-red-200{% elif rec.status == 'High' %}bg-orange-50 border-orange-200{% else %}bg-emerald-50 border-emerald-200{% endif %}">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <h3 class="text-lg font-semibold text-slate-800">{{ rec.nutrient }}</h3>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                {% if rec.status == 'Low' %}bg-red-100 text-red-800
+                                {% elif rec.status == 'High' %}bg-orange-100 text-orange-800
+                                {% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                                {{ rec.status }}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-2 text-sm">
+                            <p class="text-slate-700">
+                                <span class="font-medium">Recommended Fertilizer:</span> 
+                                <span class="text-slate-900 font-semibold">{{ rec.fertilizer }}</span>
+                            </p>
+                            <p class="text-slate-700">
+                                <span class="font-medium">Application Rate:</span> 
+                                <span class="text-slate-900 font-semibold">{{ rec.dosage }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="ml-4">
+                        <i class="fas {% if rec.status == 'Low' %}fa-arrow-down text-red-600{% elif rec.status == 'High' %}fa-arrow-up text-orange-600{% else %}fa-check text-emerald-600{% endif %} text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% elif result_type == 'disease' %}
+    <!-- Disease Detection Results -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Uploaded Image -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Uploaded Image</h3>
+            <img src="{{ image_url }}" alt="Uploaded plant" class="w-full rounded-lg border border-slate-200">
+        </div>
+
+        <!-- Detection Results -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Detection Results</h3>
+            
+            <!-- Status Badge -->
+            <div class="mb-4">
+                <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold
+                    {% if prediction.status == 'Healthy' %}bg-emerald-100 text-emerald-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    <i class="fas {% if prediction.status == 'Healthy' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} mr-2"></i>
+                    {{ prediction.status }}
+                </span>
+            </div>
+
+            <!-- Disease Name -->
+            <div class="mb-4 pb-4 border-b border-slate-200">
+                <p class="text-sm text-slate-600 mb-1">Detected Condition</p>
+                <p class="text-2xl font-bold text-slate-800">{{ prediction.disease }}</p>
+            </div>
+
+            <!-- Confidence Score -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-medium text-slate-600">Confidence Score</p>
+                    <p class="text-lg font-bold text-slate-800">{{ "%.1f"|format(prediction.confidence) }}%</p>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-red-500 to-emerald-500 h-3 rounded-full transition-all duration-500 confidence-progress" 
+                         data-width="{{ prediction.confidence }}"></div>
+                </div>
+            </div>
+
+            <!-- Risk Level -->
+            {% if management %}
+            <div class="mt-4 pt-4 border-t border-slate-200">
+                <p class="text-sm text-slate-600 mb-2">Risk Level</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                    {% if management.risk == 'High' %}bg-red-100 text-red-800
+                    {% elif management.risk == 'Medium' %}bg-amber-100 text-amber-800
+                    {% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                    {{ management.risk }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Disease Management -->
+    {% if management and prediction.status != 'Healthy' %}
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <h2 class="text-xl font-semibold text-slate-800 mb-6 flex items-center">
+            <i class="fas fa-shield-alt text-red-600 mr-2"></i>
+            Disease Management Recommendations
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Prevention -->
+            <div class="border border-slate-200 rounded-lg p-6 bg-blue-50">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-hand-holding-medical text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Prevention Measures</h3>
+                        <p class="text-sm text-slate-700">{{ management.prevention }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treatment -->
+            <div class="border border-slate-200 rounded-lg p-6 bg-emerald-50">
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-prescription-bottle text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Recommended Treatment</h3>
+                        <p class="text-sm text-slate-700">{{ management.treatment }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="mt-8 flex flex-wrap gap-4">
+        <a href="{{ url_for('dashboard') }}" 
+           class="inline-flex items-center px-6 py-3 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
+            <i class="fas fa-home mr-2"></i>
+            Back to Dashboard
+        </a>
+        
+        <a href="{% if result_type == 'crop' %}{{ url_for('crop_recommendation') }}{% elif result_type == 'fertilizer' %}{{ url_for('fertilizer_recommendation') }}{% else %}{{ url_for('disease_detection') }}{% endif %}" 
+           class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white {% if result_type == 'crop' %}bg-emerald-600 hover:bg-emerald-700{% elif result_type == 'fertilizer' %}bg-amber-600 hover:bg-amber-700{% else %}bg-red-600 hover:bg-red-700{% endif %} transition">
+            <i class="fas fa-redo mr-2"></i>
+            New Analysis
+        </a>
+    </div>
+</div>
+
+<script>
+// Set progress bar widths from data attributes
+document.addEventListener('DOMContentLoaded', function() {
+    // Crop recommendation progress bars
+    document.querySelectorAll('.crop-progress').forEach(function(bar) {
+        const width = bar.getAttribute('data-width');
+        bar.style.width = width + '%';
+    });
+    
+    // Disease confidence progress bar
+    const confidenceBar = document.querySelector('.confidence-progress');
+    if (confidenceBar) {
+        const width = confidenceBar.getAttribute('data-width');
+        confidenceBar.style.width = width + '%';
+    }
+});
+</script>
+{% endblock %}
