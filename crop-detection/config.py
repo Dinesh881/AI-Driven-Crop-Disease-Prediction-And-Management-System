@@ -3,14 +3,15 @@ Configuration settings for the Crop Disease Prediction System
 """
 import os
 
-# Get the base directory
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-    'sqlite:///' + os.path.join(basedir, 'database', 'app.db')
+
+    # Create database folder automatically
+    db_path = os.path.join(basedir, 'database')
+    os.makedirs(db_path, exist_ok=True)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(db_path, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Upload settings
