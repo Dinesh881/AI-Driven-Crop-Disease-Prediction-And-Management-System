@@ -763,6 +763,10 @@ def history():
 
 # ==================== Application Setup ====================
 
+# Create required folders
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs('database', exist_ok=True)
+
 def init_db():
     """Initialize database"""
     with app.app_context():
@@ -778,6 +782,12 @@ def init_db():
             db.session.commit()
             print("[OK] Default admin user created (admin@crop.ai / admin123)")
 
+with app.app_context():
+    init_db()
+
+# Load models
+load_disease_model()
+load_crop_models()
 
 if __name__ == '__main__':
     # Create upload directory if not exists
