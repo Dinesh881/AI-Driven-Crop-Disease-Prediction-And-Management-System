@@ -18,6 +18,7 @@ from config import Config
 
 # Initialize Flask app
 app = Flask(__name__)
+os.makedirs('database', exist_ok=True)
 app.config.from_object(Config)
 
 # Initialize database
